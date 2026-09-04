@@ -1,4 +1,4 @@
-﻿// Minimal practical application logic for Cp vs T platform
+// Minimal practical application logic for Cp vs T platform
 let allMaterials = [];
 let selectedMaterialIds = new Set([1, 2, 3]); // default Al, Cu, Fe
 let chartInstance = null;
@@ -22,7 +22,6 @@ async function initApp() {
   renderMaterialList();
   bindEvents();
   updatePlot();
-  updateRankingTable();
 }
 
 function populateCategories() {
@@ -126,7 +125,6 @@ function updatePlot() {
   }
 
   renderChart(T_grid, datasets, unit);
-  updateDetailsTable(TminInput, TmaxInput);
 }
 
 function renderChart(labels, datasets, unit) {
@@ -164,59 +162,13 @@ function renderChart(labels, datasets, unit) {
   });
 }
 
-function updateDetailsTable(T1, T2) {
-  const tbody = document.getElementById('detailsTableBody');
-  tbody.innerHTML = '';
-  selectedMaterialIds.forEach(id => {
-    const mat = allMaterials.find(m => m.id === id);
-    if (!mat) return;
-    const t298 = 298.15 / 1000.0;
-    const cp298_mol = (mat.A + mat.B * t298 + mat.C * Math.pow(t298, 2) + mat.D * Math.pow(t298, 3) + mat.E / Math.pow(t298, 2)).toFixed(2);
-    const cp298_kg = ((cp298_mol / mat.molarMass) * 1000.0).toFixed(1);
-    
-    // Thermal absorption over current temperature range
-    const heatAbs = AnalysisTools.integrateCp(mat, T1, T2);
-    const dH_kg_kJ = (heatAbs.deltaH_specific / 1000.0).toFixed(1); // kJ/kg
-
-    const tr = document.createElement('tr');
-    tr.innerHTML = '<td><b>' + mat.name + '</b></td><td>' + mat.formula + '</td><td><span class=badge>' + mat.category + '</span></td><td>' + mat.molarMass + '</td><td>' + cp298_mol + '</td><td>' + cp298_kg + '</td><td>' + dH_kg_kJ + '</td><td>' + mat.Tmin + ' - ' + mat.Tmax + '</td><td><small>' + mat.source + '</small></td>';
-    tbody.appendChild(tr);
-  });
-}
-
-function updateRankingTable() {
-  const rankT = parseFloat(document.getElementById('rankTInput').value) || 298.15;
-  const rankUnit = document.querySelector('input[name=unit]:checked')?.value || 'molar';
-  const ranked = AnalysisTools.rankMaterials(allMaterials, rankT, rankUnit, 5, false); // top 5 highest
-  const rankedLow = AnalysisTools.rankMaterials(allMaterials, rankT, rankUnit, 5, true); // top 5 lowest
-
-  const tbody = document.getElementById('rankingTableBody');
-  if (!tbody) return;
-  tbody.innerHTML = '';
-  
-  const unitStr = (rankUnit === 'molar') ? 'J/(mol·K)' : 'J/(kg·K)';
-  
-  ranked.forEach((item, idx) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = '<td>#' + (idx + 1) + ' (Highest)</td><td><b>' + item.material.name + '</b> (' + item.material.formula + ')</td><td>' + item.material.category + '</td><td><b>' + item.cpValue.toFixed(2) + ' ' + unitStr + '</b></td><td>' + (item.inRange ? '<span style=color:green;>Valid</span>' : '<span style=color:#d9534f;>Extrapolated</span>') + '</td>';
-    tbody.appendChild(tr);
-  });
-
-  rankedLow.forEach((item, idx) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = '<td>#' + (idx + 1) + ' (Lowest)</td><td><b>' + item.material.name + '</b> (' + item.material.formula + ')</td><td>' + item.material.category + '</td><td><b>' + item.cpValue.toFixed(2) + ' ' + unitStr + '</b></td><td>' + (item.inRange ? '<span style=color:green;>Valid</span>' : '<span style=color:#d9534f;>Extrapolated</span>') + '</td>';
-    tbody.appendChild(tr);
-  });
-}
-
 function bindEvents() {
   document.getElementById('searchInput').addEventListener('input', renderMaterialList);
   document.getElementById('categorySelect').addEventListener('change', renderMaterialList);
-  document.getElementById('tMinInput').addEventListener('change', () => { updatePlot(); updateRankingTable(); });
-  document.getElementById('tMaxInput').addEventListener('change', () => { updatePlot(); updateRankingTable(); });
+  document.getElementById('tMinInput').addEventListener('change', updatePlot);
+  document.getElementById('tMaxInput').addEventListener('change', updatePlot);
   document.getElementById('tStepInput').addEventListener('change', updatePlot);
-  document.querySelectorAll('input[name=unit]').forEach(r => r.addEventListener('change', () => { updatePlot(); updateRankingTable(); }));
-  document.getElementById('rankTInput').addEventListener('change', updateRankingTable);
+  document.querySelectorAll('input[name=unit]').forEach(r => r.addEventListener('change', updatePlot));
 
   document.getElementById('clearBtn').addEventListener('click', () => {
     selectedMaterialIds.clear();

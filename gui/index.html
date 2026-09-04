@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang=en>
 <head>
   <meta charset=UTF-8>
@@ -85,55 +85,6 @@
 
       <div class=card>
         <canvas id=cpChart style=max-height: 440px; width: 100%;></canvas>
-      </div>
-
-      <!-- Comparative Table with Thermal Absorption -->
-      <div class=card>
-        <h3 style=margin-top: 0; font-size: 14px;>Comparative Material Analysis & Heat Absorption (&Delta;H)</h3>
-        <div style=overflow-x: auto;>
-          <table>
-            <thead>
-              <tr>
-                <th>Material</th>
-                <th>Formula</th>
-                <th>Category</th>
-                <th>Molar Mass (g/mol)</th>
-                <th>Cp (298 K) [J/(mol·K)]</th>
-                <th>Cp (298 K) [J/(kg·K)]</th>
-                <th>&Delta;H absorption [kJ/kg]</th>
-                <th>Valid Range (K)</th>
-                <th>Source</th>
-              </tr>
-            </thead>
-            <tbody id=detailsTableBody></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Material Ranking Module -->
-      <div class=card>
-        <div style=display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;>
-          <h3 style=margin: 0; font-size: 14px;>Material Ranking Tool (Database Extremes)</h3>
-          <div style=display: flex; align-items: center; gap: 8px;>
-            <span style=font-size: 12px; color: #586069;>Evaluation Temperature:</span>
-            <input type=number id=rankTInput value=298.15 style=width: 80px; padding: 3px 6px;>
-            <span style=font-size: 12px; color: #586069;>K</span>
-          </div>
-        </div>
-        <div style=overflow-x: auto;>
-          <table>
-            <thead>
-              <tr>
-                <th>Rank</th>
-                <th>Material</th>
-                <th>Category</th>
-                <th>Specific Heat Capacity (Cp)</th>
-                <th>Validity Status</th>
-              </tr>
-            </thead>
-            <tbody id=rankingTableBody></tbody>
-          </table>
-        </div>
       </div>
 
     </div>
