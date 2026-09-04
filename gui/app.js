@@ -10,6 +10,32 @@ const colorPalette = [
   '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'
 ];
 
+let currentInteractionMode = 'pan'; // 'pan' or 'zoom'
+
+// Custom crosshair vertical guideline plugin for data tips
+const crosshairPlugin = {
+  id: 'crosshair',
+  afterDraw: (chart) => {
+    if (chart.tooltip?._active?.length) {
+      const activePoint = chart.tooltip._active[0];
+      const ctx = chart.ctx;
+      const x = activePoint.element.x;
+      const topY = chart.scales.y.top;
+      const bottomY = chart.scales.y.bottom;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.setLineDash([4, 4]);
+      ctx.moveTo(x, topY);
+      ctx.lineTo(x, bottomY);
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = '#6e7781';
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+};
+
 async function initApp() {
   try {
     const res = await fetch('../data/materials_data.json');
@@ -127,6 +153,64 @@ function updatePlot() {
   renderChart(T_grid, datasets, unit);
 }
 
+function updateCursorHud(event, chart, unit) {
+  const hud = document.getElementById('cursorHud');
+  if (!hud || !chart || !chart.scales || !chart.scales.x) return;
+
+  const rect = chart.canvas.getBoundingClientRect();
+  const mouseX = event.clientX - rect.left;
+  const mouseY = event.clientY - rect.top;
+
+  const chartArea = chart.chartArea;
+  if (!chartArea || mouseX < chartArea.left || mouseX > chartArea.right || mouseY < chartArea.top || mouseY > chartArea.bottom) {
+    resetCursorHud();
+    return;
+  }
+
+  const exactT = chart.scales.x.getValueForPixel(mouseX);
+  if (exactT === null || isNaN(exactT)) {
+    resetCursorHud();
+    return;
+  }
+
+  const unitStr = (unit === 'molar') ? 'J/(mol·K)' : 'J/(kg·K)';
+  const t_val = exactT / 1000.0;
+
+  let html = '<span class="hud-temp-badge">T = ' + exactT.toFixed(1) + ' K</span>';
+
+  let count = 0;
+  selectedMaterialIds.forEach(id => {
+    const mat = allMaterials.find(m => m.id === id);
+    if (!mat) return;
+    count++;
+
+    const cp_mol = mat.A + mat.B * t_val + mat.C * Math.pow(t_val, 2) + mat.D * Math.pow(t_val, 3) + mat.E / Math.pow(t_val, 2);
+    const cp_val = (unit === 'molar') ? cp_mol : (cp_mol / mat.molarMass) * 1000.0;
+    const inRange = (exactT >= mat.Tmin && exactT <= mat.Tmax);
+    const color = colorPalette[(mat.id - 1) % colorPalette.length];
+
+    html += '<span class="hud-material-chip">' +
+      '<span class="chip-dot" style="background-color:' + color + '"></span>' +
+      '<strong>' + mat.name + ' (' + mat.formula + '):</strong> ' +
+      '<span class="chip-val">' + cp_val.toFixed(2) + ' ' + unitStr + '</span>' +
+      (inRange ? '' : ' <span class="chip-warning">Extrapolated</span>') +
+      '</span>';
+  });
+
+  if (count === 0) {
+    html += '<span class="hud-placeholder">Select materials to view live cursor data tips</span>';
+  }
+
+  hud.innerHTML = html;
+}
+
+function resetCursorHud() {
+  const hud = document.getElementById('cursorHud');
+  if (hud) {
+    hud.innerHTML = '<span class="hud-placeholder">🎯 Move cursor over plot for live temperature & Cp data tips | Scroll wheel to zoom</span>';
+  }
+}
+
 function renderChart(labels, datasets, unit) {
   const ctx = document.getElementById('cpChart').getContext('2d');
   const yLabel = (unit === 'molar') ? 'Specific Heat Capacity Cp [J/(mol·K)]' : 'Specific Heat Capacity Cp [J/(kg·K)]';
@@ -141,12 +225,71 @@ function renderChart(labels, datasets, unit) {
       labels: labels,
       datasets: datasets
     },
+    plugins: [crosshairPlugin],
     options: {
       responsive: true,
       animation: false,
       interaction: {
         mode: 'index',
         intersect: false
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: {
+            boxWidth: 12,
+            font: { size: 12 }
+          }
+        },
+        tooltip: {
+          enabled: true,
+          mode: 'index',
+          intersect: false,
+          backgroundColor: 'rgba(255, 255, 255, 0.96)',
+          titleColor: '#1f2328',
+          bodyColor: '#24292f',
+          borderColor: '#d0d7de',
+          borderWidth: 1,
+          padding: 8,
+          boxPadding: 4,
+          usePointStyle: true,
+          callbacks: {
+            title: function(items) {
+              if (!items.length) return '';
+              return 'Temperature: ' + items[0].label + ' K';
+            },
+            label: function(context) {
+              const unitStr = (unit === 'molar') ? 'J/(mol·K)' : 'J/(kg·K)';
+              const ds = context.dataset;
+              const val = context.parsed.y;
+              return ' ' + ds.label + ': ' + val.toFixed(2) + ' ' + unitStr;
+            }
+          }
+        },
+        zoom: {
+          pan: {
+            enabled: (currentInteractionMode === 'pan'),
+            mode: 'xy',
+            threshold: 5
+          },
+          zoom: {
+            wheel: {
+              enabled: true,
+              speed: 0.08
+            },
+            pinch: {
+              enabled: true
+            },
+            drag: {
+              enabled: (currentInteractionMode === 'zoom'),
+              backgroundColor: 'rgba(3, 102, 214, 0.15)',
+              borderColor: '#0366d6',
+              borderWidth: 1
+            },
+            mode: 'xy'
+          }
+        }
       },
       scales: {
         x: {
@@ -160,6 +303,14 @@ function renderChart(labels, datasets, unit) {
       }
     }
   });
+
+  const canvas = document.getElementById('cpChart');
+  canvas.onmousemove = function(e) {
+    updateCursorHud(e, chartInstance, unit);
+  };
+  canvas.onmouseleave = function() {
+    resetCursorHud();
+  };
 }
 
 function bindEvents() {
@@ -169,6 +320,47 @@ function bindEvents() {
   document.getElementById('tMaxInput').addEventListener('change', updatePlot);
   document.getElementById('tStepInput').addEventListener('change', updatePlot);
   document.querySelectorAll('input[name=unit]').forEach(r => r.addEventListener('change', updatePlot));
+
+  // Interactive zoom & pan toolbar controls
+  document.getElementById('panModeBtn')?.addEventListener('click', () => {
+    currentInteractionMode = 'pan';
+    document.getElementById('panModeBtn').classList.add('active');
+    document.getElementById('zoomModeBtn').classList.remove('active');
+    if (chartInstance && chartInstance.options.plugins && chartInstance.options.plugins.zoom) {
+      chartInstance.options.plugins.zoom.pan.enabled = true;
+      chartInstance.options.plugins.zoom.zoom.drag.enabled = false;
+      chartInstance.update('none');
+    }
+  });
+
+  document.getElementById('zoomModeBtn')?.addEventListener('click', () => {
+    currentInteractionMode = 'zoom';
+    document.getElementById('zoomModeBtn').classList.add('active');
+    document.getElementById('panModeBtn').classList.remove('active');
+    if (chartInstance && chartInstance.options.plugins && chartInstance.options.plugins.zoom) {
+      chartInstance.options.plugins.zoom.pan.enabled = false;
+      chartInstance.options.plugins.zoom.zoom.drag.enabled = true;
+      chartInstance.update('none');
+    }
+  });
+
+  document.getElementById('zoomInBtn')?.addEventListener('click', () => {
+    if (chartInstance && typeof chartInstance.zoom === 'function') {
+      chartInstance.zoom(1.2);
+    }
+  });
+
+  document.getElementById('zoomOutBtn')?.addEventListener('click', () => {
+    if (chartInstance && typeof chartInstance.zoom === 'function') {
+      chartInstance.zoom(0.8);
+    }
+  });
+
+  document.getElementById('resetZoomBtn')?.addEventListener('click', () => {
+    if (chartInstance && typeof chartInstance.resetZoom === 'function') {
+      chartInstance.resetZoom();
+    }
+  });
 
   document.getElementById('clearBtn').addEventListener('click', () => {
     selectedMaterialIds.clear();

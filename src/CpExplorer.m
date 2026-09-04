@@ -1,4 +1,4 @@
-﻿function CpExplorer
+function CpExplorer
 % CPEXPLORER Standard, clean MATLAB App for Cp vs T analysis
 dataMat = load('data/materials_data.mat', 'matList', 'T');
 matList = dataMat.matList;
@@ -39,6 +39,8 @@ grid(ax, 'on');
 title(ax, 'Cp vs Temperature');
 xlabel(ax, 'Temperature T [K]');
 ylabel(ax, 'Specific Heat Capacity Cp [J/(mol*K)]');
+% Enable interactive toolbar for zooming, panning, datacursor values/tips, and reset view
+axtoolbar(ax, {'zoomin', 'zoomout', 'pan', 'datacursor', 'restoreview'});
 
     function refreshPlot()
         cla(ax);

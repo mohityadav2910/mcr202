@@ -6,6 +6,8 @@
   <title>Cp vs T Database Platform - 200 Engineering Materials</title>
   <link rel=stylesheet href=styles.css>
   <script src=chart.umd.min.js></script>
+  <script src=hammer.min.js></script>
+  <script src=chartjs-plugin-zoom.min.js></script>
   <script src=analysis.js></script>
 </head>
 <body>
@@ -84,7 +86,30 @@
       <div id=warningBox class=warning-box></div>
 
       <div class=card>
-        <canvas id=cpChart style=max-height: 440px; width: 100%;></canvas>
+        <!-- Interactive Toolbar: Zoom, Pan & View Controls -->
+        <div class="plot-toolbar-container">
+          <div class="plot-toolbar">
+            <span class="toolbar-label">Interactive Controls:</span>
+            <button id="panModeBtn" class="tool-btn active" title="Click and drag to pan plot in any direction">✋ Pan Mode</button>
+            <button id="zoomModeBtn" class="tool-btn" title="Click and drag a box to zoom into a specific region">🔍 Box Zoom</button>
+            <span class="toolbar-sep"></span>
+            <button id="zoomInBtn" class="tool-btn" title="Zoom in">+ Zoom In</button>
+            <button id="zoomOutBtn" class="tool-btn" title="Zoom out">- Zoom Out</button>
+            <button id="resetZoomBtn" class="tool-btn" title="Reset to original view">⟲ Reset View</button>
+          </div>
+          <div class="toolbar-hint">
+            <span>🖱️ Mouse Wheel to Zoom | Drag to Pan/Zoom</span>
+          </div>
+        </div>
+
+        <!-- Live Cursor Values & Data Tips HUD -->
+        <div id="cursorHud" class="cursor-hud">
+          <span class="hud-placeholder">🎯 Move cursor over plot for live temperature & Cp data tips | Scroll wheel to zoom</span>
+        </div>
+
+        <div style="position: relative; width: 100%;">
+          <canvas id=cpChart style=max-height: 460px; width: 100%;></canvas>
+        </div>
       </div>
 
     </div>
