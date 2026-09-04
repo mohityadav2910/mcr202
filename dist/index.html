@@ -261,13 +261,99 @@ th {
   border-radius: 2px;
 }
 
+
+.warning-box {
+  display: none;
+  background-color: #fff9db;
+  border: 1px solid #f59f00;
+  border-left: 5px solid #f59f00;
+  color: #5c4709;
+  padding: 10px 14px;
+  border-radius: 4px;
+  font-size: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.warning-box strong {
+  color: #d9480f;
+  font-size: 13px;
+}
+.warning-box ul {
+  margin: 6px 0 2px 0;
+  padding-left: 20px;
+}
+.warning-box li {
+  margin-bottom: 3px;
+}
+.badge-valid {
+  display: inline-block;
+  padding: 2px 6px;
+  background-color: #e6fcf5;
+  color: #0ca678;
+  border: 1px solid #96f2d7;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.badge-warn {
+  display: inline-block;
+  padding: 2px 6px;
+  background-color: #fff5f5;
+  color: #f03e3e;
+  border: 1px solid #ffc9c9;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.preset-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+.preset-btn {
+  background-color: #f1f3f5;
+  color: #495057;
+  border: 1px solid #ced4da;
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 11px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+.preset-btn:hover {
+  background-color: #e9ecef;
+  border-color: #adb5bd;
+}
+.hud-material-chip .chip-warning {
+  color: #d9480f;
+  font-size: 10px;
+  font-weight: bold;
+  background: #fff4e6;
+  border: 1px solid #ffd8a8;
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+
 </style>
 </head>
 <body>
 
   <header>
-    <h1>Interactive Specific Heat Capacity (Cp vs. T) Platform</h1>
-    <p>Thermodynamic Database & Comparative Analysis for 200 Engineering Materials | NIST Shomate Formulation</p>
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+      <div>
+        <h1 style="margin: 0 0 4px 0; font-size: 20px; color: #1a1f2c;">Interactive (Cp vs. T) Materials Thermodynamics Platform</h1>
+        <p style="margin: 0; font-size: 13px; color: #586069;">
+          Course Project: Materials Specific Heat Capacity Database | NIST Shomate Formulation (200 Engineering Materials)
+        </p>
+      </div>
+      <div style="text-align: right; font-size: 12px; color: #586069;">
+        <span class="badge" style="background:#e7f5ff; color:#1971c2; font-weight:600; border:1px solid #a5d8ff;">MCR202 Lab Platform</span>
+        <span class="badge" style="background:#f8f9fa; color:#495057; border:1px solid #dee2e6;">NIST Validated</span>
+      </div>
+    </div>
   </header>
 
   <div class=main-container>
@@ -287,6 +373,13 @@ th {
         <div style=display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;>
           <label style=margin-bottom: 0;>Select Materials to Compare:</label>
           <button id=clearBtn class=btn btn-secondary style=padding: 2px 6px; font-size: 11px;>Clear All</button>
+        </div>
+        <div class="preset-container">
+          <span style="font-size: 11px; color: #6c757d; align-self: center;">Quick Presets:</span>
+          <button type="button" class="preset-btn" data-preset="metals" title="Aluminium, Copper, Iron">Metals (Al, Cu, Fe)</button>
+          <button type="button" class="preset-btn" data-preset="semi" title="Silicon, Germanium, Gallium Arsenide">Semiconductors</button>
+          <button type="button" class="preset-btn" data-preset="ceramics" title="Al2O3, SiC, ZrO2">Refractory Ceramics</button>
+          <button type="button" class="preset-btn" data-preset="polymers" title="PE, PTFE, PVC">Polymers</button>
         </div>
         <div id=materialList class=material-list></div>
       </div>
@@ -328,10 +421,12 @@ th {
       <div class=form-group>
         <label>Export Tools:</label>
         <div style=display: flex; gap: 8px;>
-          <button id=exportCsvBtn class=btn btn-secondary style=flex: 1;>Export CSV</button>
-          <button id=exportPngBtn class=btn btn-secondary style=flex: 1;>Export PNG</button>
+          <button id=exportCsvBtn class=btn btn-secondary style=flex: 1; title="Export plotted numerical curves to CSV">Export CSV</button>
+          <button id=exportPngBtn class=btn btn-secondary style=flex: 1; title="Export plot figure as high-resolution PNG">Export PNG</button>
         </div>
       </div>
+
+      
     </div>
 
     <!-- Main Content Area: Plot and Analysis Tables -->
@@ -364,6 +459,38 @@ th {
           <canvas id=cpChart style=max-height: 460px; width: 100%;></canvas>
         </div>
       </div>
+
+      <!-- Comparative Table with Thermal Absorption & Citations -->
+      <div class=card>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+          <div>
+            <h3 style="margin: 0; font-size: 14px; color: #212529;">Selected Materials: Thermodynamic Summary & Comparative Analysis</h3>
+            <span style="font-size: 11px; color: #6c757d;">Standard reference T = 298.15 K | Sensible enthalpy integral ΔH over plotted temperature range</span>
+          </div>
+        </div>
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Material</th>
+                <th>Formula</th>
+                <th>Category</th>
+                <th>Molar Mass (g/mol)</th>
+                <th>Cp (298 K) [J/(mol·K)]</th>
+                <th>Cp (298 K) [J/(kg·K)]</th>
+                <th>ΔH sensible [kJ/kg]</th>
+                <th>Valid NIST Range (K)</th>
+                <th>Range Status</th>
+                <th>Thermodynamic Data Source</th>
+              </tr>
+            </thead>
+            <tbody id="detailsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      
+        
 
     </div>
   </div>
@@ -3816,7 +3943,7 @@ const inlineMaterials = [
 ];
 </script>
 <script>
-﻿// Analytical and Export Tools for Cp Platform
+// Analytical and Export Tools for Cp Platform
 const AnalysisTools = {
   // Analytical thermal absorption integral: integral of Cp dT from T1 to T2 [J/mol]
   integrateCp: function(mat, T1, T2) {
@@ -3841,23 +3968,14 @@ const AnalysisTools = {
   },
 
   // Rank database materials by Cp at temperature T
-  rankMaterials: function(materials, T, unit, topN, ascending) {
-    const scored = materials.map(m => {
-      const t = T / 1000.0;
-      const cp_mol = m.A + m.B * t + m.C * Math.pow(t, 2) + m.D * Math.pow(t, 3) + m.E / Math.pow(t, 2);
-      const cp_val = (unit === 'molar') ? cp_mol : (cp_mol / m.molarMass) * 1000.0;
-      return { material: m, cpValue: cp_val, inRange: (T >= m.Tmin && T <= m.Tmax) };
-    });
-    scored.sort((a, b) => ascending ? a.cpValue - b.cpValue : b.cpValue - a.cpValue);
-    return scored.slice(0, topN || 10);
-  },
+  
 
   // Generate CSV text for plotted datasets
   generateCSV: function(T_grid, datasets, unit) {
     const unitStr = (unit === 'molar') ? 'J/(mol*K)' : 'J/(kg*K)';
     let csv = 'Temperature_K';
     datasets.forEach(ds => {
-      csv += ',' + ds.label.replace(//g, '"') + ' [' + unitStr + ']';
+      csv += ',"' + ds.label.replace(/"/g, '""') + ' [' + unitStr + ']"';
     });
     csv += '\r\n';
 
@@ -3893,9 +4011,9 @@ if (typeof module !== 'undefined' && module.exports) {
 
 </script>
 <script>
-// Minimal practical application logic for Cp vs T platform
+// Materials Thermodynamics Platform - Client Application Logic (MCR202)
 let allMaterials = [];
-let selectedMaterialIds = new Set([1, 2, 3]); // default Al, Cu, Fe
+let selectedMaterialIds = new Set([1, 2, 3]); // default Aluminium, Copper, Iron
 let chartInstance = null;
 let currentTGrid = [];
 let currentDatasets = [];
@@ -3936,19 +4054,20 @@ async function initApp() {
     const res = await fetch('../data/materials_data.json');
     allMaterials = await res.json();
   } catch (e) {
-    console.warn('Fetch failed, checking inline materialsData', e);
+    console.warn('Fetch failed, falling back to embedded materials dataset:', e);
     if (typeof inlineMaterials !== 'undefined') allMaterials = inlineMaterials;
   }
   populateCategories();
   renderMaterialList();
   bindEvents();
   updatePlot();
+  
 }
 
 function populateCategories() {
   const select = document.getElementById('categorySelect');
   const cats = Array.from(new Set(allMaterials.map(m => m.category))).sort();
-  select.innerHTML = '<option value=ALL>-- All Categories (' + allMaterials.length + ') --</option>';
+  select.innerHTML = '<option value="ALL">-- All Categories (' + allMaterials.length + ' Materials) --</option>';
   cats.forEach(c => {
     const count = allMaterials.filter(m => m.category === c).length;
     const opt = document.createElement('option');
@@ -3970,11 +4089,16 @@ function renderMaterialList() {
     return matchCat && matchSearch;
   });
 
+  if (filtered.length === 0) {
+    listDiv.innerHTML = '<div style="padding: 10px; color: #868e96; font-size: 12px; text-align: center;">No matching materials found.</div>';
+    return;
+  }
+
   filtered.forEach(m => {
     const item = document.createElement('div');
     item.className = 'material-item';
     const checked = selectedMaterialIds.has(m.id) ? 'checked' : '';
-    item.innerHTML = '<input type=checkbox data-id=' + m.id + ' ' + checked + '> <span><b>' + m.name + '</b> (' + m.formula + ') - <small style=color:#666;>' + m.category + '</small></span>';
+    item.innerHTML = '<input type="checkbox" data-id="' + m.id + '" ' + checked + '> <span><b>' + m.name + '</b> (' + m.formula + ') - <small style="color:#666;">' + m.category + '</small></span>';
     item.querySelector('input').addEventListener('change', (e) => {
       if (e.target.checked) {
         selectedMaterialIds.add(m.id);
@@ -3990,7 +4114,7 @@ function renderMaterialList() {
 function updatePlot() {
   const TminInput = parseFloat(document.getElementById('tMinInput').value) || 298.15;
   const TmaxInput = parseFloat(document.getElementById('tMaxInput').value) || 1200;
-  const Tstep = parseFloat(document.getElementById('tStepInput').value) || 10;
+  const Tstep = Math.max(1, parseFloat(document.getElementById('tStepInput').value) || 10);
   const unitRadio = document.querySelector('input[name=unit]:checked');
   const unit = unitRadio ? unitRadio.value : 'molar';
 
@@ -4001,6 +4125,7 @@ function updatePlot() {
   currentTGrid = T_grid;
 
   const datasets = [];
+  const warningMsgs = [];
   let colorIdx = 0;
 
   selectedMaterialIds.forEach(id => {
@@ -4010,16 +4135,32 @@ function updatePlot() {
     colorIdx++;
 
     const dataPoints = [];
+    let hasExtrap = false;
+    const extrapReasons = [];
+
+    if (TminInput < mat.Tmin - 2) {
+      hasExtrap = true;
+      extrapReasons.push('T_min (' + TminInput + ' K) is below lower limit (' + mat.Tmin + ' K)');
+    }
+    if (TmaxInput > mat.Tmax + 2) {
+      hasExtrap = true;
+      extrapReasons.push('T_max (' + TmaxInput + ' K) is above upper limit (' + mat.Tmax + ' K)');
+    }
 
     T_grid.forEach(T => {
       const t = T / 1000.0;
+      // NIST Shomate equation: Cp = A + B*t + C*t^2 + D*t^3 + E/t^2
       const Cp_mol = mat.A + mat.B * t + mat.C * Math.pow(t, 2) + mat.D * Math.pow(t, 3) + mat.E / Math.pow(t, 2);
       const val = (unit === 'molar') ? Cp_mol : (Cp_mol / mat.molarMass) * 1000.0;
       dataPoints.push(Math.round(val * 100) / 100);
     });
 
+    if (hasExtrap) {
+      warningMsgs.push('<b>' + mat.name + ' (' + mat.formula + '):</b> Empirical valid range is <b>[' + mat.Tmin + ' – ' + mat.Tmax + ' K]</b>. Selected range extends ' + extrapReasons.join(' and ') + '.');
+    }
+
     datasets.push({
-      label: mat.name + ' (' + mat.formula + ')',
+      label: mat.name + ' (' + mat.formula + ')' + (hasExtrap ? ' ⚠️' : ''),
       data: dataPoints,
       borderColor: color,
       backgroundColor: color,
@@ -4030,17 +4171,83 @@ function updatePlot() {
   });
   currentDatasets = datasets;
 
+  // Render appropriate thermodynamic range warning when temperature lies outside valid limits
   const warnBox = document.getElementById('warningBox');
   if (warnBox) {
-    warnBox.style.display = 'none';
+    if (warningMsgs.length > 0) {
+      warnBox.style.display = 'block';
+      warnBox.innerHTML = '<div style="display:flex; gap:10px; align-items:flex-start;">' +
+        '<span style="font-size: 20px; line-height: 1;">⚠️</span>' +
+        '<div>' +
+        '<strong>Thermodynamic Equation Validity Warning (Extrapolation Outside Empirical Limits):</strong>' +
+        '<p style="margin: 3px 0 6px 0; font-size: 12px; color: #5c4709;">' +
+        'The selected temperature range [' + TminInput + ' K – ' + TmaxInput + ' K] extends outside the empirically fitted temperature bounds of the NIST Shomate equation for the following material(s). ' +
+        'Thermodynamic equations are empirical fits; extrapolating beyond empirical limits will produce non-physical heat capacity values or mathematical divergence:' +
+        '</p>' +
+        '<ul style="margin: 0; padding-left: 18px; font-size: 12px; line-height: 1.5;">' +
+        warningMsgs.map(m => '<li>' + m + '</li>').join('') +
+        '</ul>' +
+        '</div>' +
+        '</div>';
+    } else {
+      warnBox.style.display = 'none';
+      warnBox.innerHTML = '';
+    }
   }
 
   renderChart(T_grid, datasets, unit);
+  updateDetailsTable(TminInput, TmaxInput);
 }
+
+function updateDetailsTable(T1, T2) {
+  const tbody = document.getElementById('detailsTableBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  if (selectedMaterialIds.size === 0) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:#868e96; padding:12px; font-style:italic;">No materials selected. Please check materials in the sidebar to view comparison.</td></tr>';
+    return;
+  }
+
+  selectedMaterialIds.forEach(id => {
+    const mat = allMaterials.find(m => m.id === id);
+    if (!mat) return;
+    const t298 = 298.15 / 1000.0;
+    const cp298_mol = (mat.A + mat.B * t298 + mat.C * Math.pow(t298, 2) + mat.D * Math.pow(t298, 3) + mat.E / Math.pow(t298, 2)).toFixed(2);
+    const cp298_kg = ((cp298_mol / mat.molarMass) * 1000.0).toFixed(1);
+
+    // Analytical sensible heat absorption over user-selected temperature range
+    let dH_kg_kJ = 'N/A';
+    if (typeof AnalysisTools !== 'undefined' && AnalysisTools.integrateCp) {
+      const heatAbs = AnalysisTools.integrateCp(mat, T1, T2);
+      dH_kg_kJ = (heatAbs.deltaH_specific / 1000.0).toFixed(1);
+    }
+
+    const isExtrap = (T1 < mat.Tmin - 2 || T2 > mat.Tmax + 2);
+    const statusBadge = isExtrap
+      ? '<span class="badge-warn">⚠️ Extrapolated</span>'
+      : '<span class="badge-valid">✓ Within Limits</span>';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td><b>' + mat.name + '</b></td>' +
+      '<td><code>' + mat.formula + '</code></td>' +
+      '<td><span class="badge">' + mat.category + '</span></td>' +
+      '<td>' + mat.molarMass.toFixed(2) + '</td>' +
+      '<td><b>' + cp298_mol + '</b></td>' +
+      '<td><b>' + cp298_kg + '</b></td>' +
+      '<td>' + dH_kg_kJ + '</td>' +
+      '<td>' + mat.Tmin + ' – ' + mat.Tmax + ' K</td>' +
+      '<td>' + statusBadge + '</td>' +
+      '<td><small style="color:#495057;">' + mat.source + '</small></td>';
+    tbody.appendChild(tr);
+  });
+}
+
+
 
 function updateCursorHud(event, chart, unit) {
   const hud = document.getElementById('cursorHud');
-  if (!hud || !chart || !chart.scales || !chart.scales.x) return;
+  if (!hud || !chart || !chart.scales || !chart.scales.x || !currentTGrid || !currentTGrid.length) return;
 
   const rect = chart.canvas.getBoundingClientRect();
   const mouseX = event.clientX - rect.left;
@@ -4052,11 +4259,14 @@ function updateCursorHud(event, chart, unit) {
     return;
   }
 
-  const exactT = chart.scales.x.getValueForPixel(mouseX);
-  if (exactT === null || isNaN(exactT)) {
+  // Chart.js uses category labels on X axis; getValueForPixel returns label index
+  const rawIdx = chart.scales.x.getValueForPixel(mouseX);
+  if (rawIdx === null || isNaN(rawIdx)) {
     resetCursorHud();
     return;
   }
+  const idx = Math.max(0, Math.min(currentTGrid.length - 1, Math.round(rawIdx)));
+  const exactT = currentTGrid[idx];
 
   const unitStr = (unit === 'molar') ? 'J/(mol·K)' : 'J/(kg·K)';
   const t_val = exactT / 1000.0;
@@ -4071,18 +4281,20 @@ function updateCursorHud(event, chart, unit) {
 
     const cp_mol = mat.A + mat.B * t_val + mat.C * Math.pow(t_val, 2) + mat.D * Math.pow(t_val, 3) + mat.E / Math.pow(t_val, 2);
     const cp_val = (unit === 'molar') ? cp_mol : (cp_mol / mat.molarMass) * 1000.0;
-    const inRange = (exactT >= mat.Tmin && exactT <= mat.Tmax);
+    // Apply 2K numerical tolerance around NIST limits
+    const inRange = (exactT >= mat.Tmin - 2 && exactT <= mat.Tmax + 2);
     const color = colorPalette[(mat.id - 1) % colorPalette.length];
 
     html += '<span class="hud-material-chip">' +
       '<span class="chip-dot" style="background-color:' + color + '"></span>' +
       '<strong>' + mat.name + ' (' + mat.formula + '):</strong> ' +
       '<span class="chip-val">' + cp_val.toFixed(2) + ' ' + unitStr + '</span>' +
+      (inRange ? '' : ' <span class="chip-warning">⚠️ Outside Range (' + mat.Tmin + '–' + mat.Tmax + ' K)</span>') +
       '</span>';
   });
 
   if (count === 0) {
-    html += '<span class="hud-placeholder">Select materials to view live cursor data tips</span>';
+    html += '<span class="hud-placeholder">Select materials from the left to view live cursor data tips</span>';
   }
 
   hud.innerHTML = html;
@@ -4130,7 +4342,7 @@ function renderChart(labels, datasets, unit) {
           enabled: true,
           mode: 'index',
           intersect: false,
-          backgroundColor: 'rgba(255, 255, 255, 0.96)',
+          backgroundColor: 'rgba(255, 255, 255, 0.97)',
           titleColor: '#1f2328',
           bodyColor: '#24292f',
           borderColor: '#d0d7de',
@@ -4147,7 +4359,14 @@ function renderChart(labels, datasets, unit) {
               const unitStr = (unit === 'molar') ? 'J/(mol·K)' : 'J/(kg·K)';
               const ds = context.dataset;
               const val = context.parsed.y;
-              return ' ' + ds.label + ': ' + val.toFixed(2) + ' ' + unitStr;
+              const cleanLabel = ds.label.replace(' ⚠️', '');
+              const mat = allMaterials.find(m => (m.name + ' (' + m.formula + ')') === cleanLabel);
+              const T = parseFloat(context.label);
+              let warnTag = '';
+              if (mat && (T < mat.Tmin || T > mat.Tmax)) {
+                warnTag = ' [⚠️ Extrapolated: Valid ' + mat.Tmin + '–' + mat.Tmax + ' K]';
+              }
+              return ' ' + cleanLabel + ': ' + val.toFixed(2) + ' ' + unitStr + warnTag;
             }
           }
         },
@@ -4200,10 +4419,42 @@ function renderChart(labels, datasets, unit) {
 function bindEvents() {
   document.getElementById('searchInput').addEventListener('input', renderMaterialList);
   document.getElementById('categorySelect').addEventListener('change', renderMaterialList);
-  document.getElementById('tMinInput').addEventListener('change', updatePlot);
-  document.getElementById('tMaxInput').addEventListener('change', updatePlot);
+  document.getElementById('tMinInput').addEventListener('change', () => { updatePlot();  });
+  document.getElementById('tMaxInput').addEventListener('change', () => { updatePlot();  });
   document.getElementById('tStepInput').addEventListener('change', updatePlot);
-  document.querySelectorAll('input[name=unit]').forEach(r => r.addEventListener('change', updatePlot));
+  document.querySelectorAll('input[name=unit]').forEach(r => r.addEventListener('change', () => { updatePlot();  }));
+  
+  
+
+  // Quick Material Preset Buttons
+  document.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const preset = e.target.getAttribute('data-preset');
+      selectedMaterialIds.clear();
+      if (preset === 'metals') {
+        // Aluminium (1), Copper (2), Iron (3)
+        [1, 2, 3].forEach(id => selectedMaterialIds.add(id));
+      } else if (preset === 'semi') {
+        // Silicon, Germanium, Gallium Arsenide
+        const found = allMaterials.filter(m => ['Silicon', 'Germanium', 'Gallium Arsenide'].includes(m.name));
+        found.forEach(m => selectedMaterialIds.add(m.id));
+      } else if (preset === 'ceramics') {
+        // Al2O3, Silicon Carbide, Zirconia
+        const found = allMaterials.filter(m => 
+          m.name.includes('Aluminium Oxide') || 
+          m.name.includes('Silicon Carbide') || 
+          m.name.includes('Zirconium Dioxide') ||
+          m.formula === 'Al2O3' || m.formula === 'SiC' || m.formula === 'ZrO2'
+        );
+        found.slice(0, 3).forEach(m => selectedMaterialIds.add(m.id));
+      } else if (preset === 'polymers') {
+        const found = allMaterials.filter(m => m.category === 'Polymers').slice(0, 3);
+        found.forEach(m => selectedMaterialIds.add(m.id));
+      }
+      renderMaterialList();
+      updatePlot();
+    });
+  });
 
   // Interactive zoom & pan toolbar controls
   document.getElementById('panModeBtn')?.addEventListener('click', () => {
@@ -4255,7 +4506,7 @@ function bindEvents() {
   document.getElementById('exportCsvBtn').addEventListener('click', () => {
     const unit = document.querySelector('input[name=unit]:checked')?.value || 'molar';
     const csvContent = AnalysisTools.generateCSV(currentTGrid, currentDatasets, unit);
-    AnalysisTools.downloadFile(csvContent, 'Cp_vs_T_data_export.csv', 'text/csv;charset=utf-8;');
+    AnalysisTools.downloadFile(csvContent, 'MCR202_Cp_vs_T_data_export.csv', 'text/csv;charset=utf-8;');
   });
 
   document.getElementById('exportPngBtn').addEventListener('click', () => {
@@ -4263,7 +4514,7 @@ function bindEvents() {
     const imageURI = canvas.toDataURL('image/png');
     const a = document.createElement('a');
     a.href = imageURI;
-    a.download = 'Cp_vs_T_Plot.png';
+    a.download = 'MCR202_Cp_vs_T_Plot.png';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
