@@ -106,7 +106,6 @@ function updatePlot() {
   currentTGrid = T_grid;
 
   const datasets = [];
-  const warningMsgs = [];
   let colorIdx = 0;
 
   selectedMaterialIds.forEach(id => {
@@ -116,19 +115,13 @@ function updatePlot() {
     colorIdx++;
 
     const dataPoints = [];
-    let hasExtrap = false;
 
     T_grid.forEach(T => {
       const t = T / 1000.0;
       const Cp_mol = mat.A + mat.B * t + mat.C * Math.pow(t, 2) + mat.D * Math.pow(t, 3) + mat.E / Math.pow(t, 2);
       const val = (unit === 'molar') ? Cp_mol : (Cp_mol / mat.molarMass) * 1000.0;
       dataPoints.push(Math.round(val * 100) / 100);
-      if (T < mat.Tmin || T > mat.Tmax) hasExtrap = true;
     });
-
-    if (hasExtrap) {
-      warningMsgs.push(mat.name + ' (' + mat.formula + '): valid range is [' + mat.Tmin + ' - ' + mat.Tmax + ' K]. Current plot [' + TminInput + ' - ' + TmaxInput + ' K] includes extrapolation.');
-    }
 
     datasets.push({
       label: mat.name + ' (' + mat.formula + ')',
@@ -143,10 +136,7 @@ function updatePlot() {
   currentDatasets = datasets;
 
   const warnBox = document.getElementById('warningBox');
-  if (warningMsgs.length > 0) {
-    warnBox.style.display = 'block';
-    warnBox.innerHTML = '<b>Temperature Range Warning:</b><br>' + warningMsgs.join('<br>');
-  } else {
+  if (warnBox) {
     warnBox.style.display = 'none';
   }
 
@@ -193,7 +183,6 @@ function updateCursorHud(event, chart, unit) {
       '<span class="chip-dot" style="background-color:' + color + '"></span>' +
       '<strong>' + mat.name + ' (' + mat.formula + '):</strong> ' +
       '<span class="chip-val">' + cp_val.toFixed(2) + ' ' + unitStr + '</span>' +
-      (inRange ? '' : ' <span class="chip-warning">Extrapolated</span>') +
       '</span>';
   });
 
